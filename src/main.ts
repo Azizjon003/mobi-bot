@@ -5,7 +5,6 @@ import session from "./core/session";
 import botStart from "./utils/startBot";
 import stage from "./scenes/index";
 import { SceneContext } from "telegraf/typings/scenes";
-import { subcribeFunk } from "./utils/subcribe";
 import prisma from "../prisma/prisma";
 
 bot.use(session);
