@@ -71,7 +71,19 @@ scene.action(/^per_/, async (ctx: any) => {
     return ctx.reply("Bunday telefon topilmadi");
   }
 
-  ctx.reply("To'lov muvaffaqiyatli amalga oshirildi");
+  const price = (await prisma.mobilePrice.findFirst({
+    orderBy: {
+      created_at: "desc",
+    },
+  })) || {
+    price: 12700,
+  };
+
+  const totalPrice = price?.price * product.price;
+
+  const text = priceCalcFunk(totalPrice, Number(percentage));
+
+  ctx.editMessageText(text);
 });
 
 let initPercentageKeyboard = (initPercentage: number[], itemId: String) => {
@@ -84,5 +96,37 @@ let initPercentageKeyboard = (initPercentage: number[], itemId: String) => {
     }),
     2
   );
+};
+
+const priceCalcFunk = (price: number, percentage: number) => {
+  let month = [3, 6, 12];
+  let prices = [];
+
+  let text = `Siz tanlagan to'lov ${percentage}% bo'yicha quyidagicha to'lashingiz mumkin:\n`;
+
+  for (let mon of month) {
+    let txt = "";
+    let corePrice = price - (price * percentage) / 100;
+    if (mon === 3) {
+      let pricess = corePrice + corePrice * 0.20104;
+      txt = `3 oylik to'lov: ${pricess} so'm\nBo'lib to'lash: ${
+        pricess / 3
+      } so'm`;
+    } else if (mon === 6) {
+      let pricess = corePrice + corePrice * 0.36757;
+      txt = `6 oylik to'lov: ${pricess} so'm\nBo'lib to'lash: ${
+        pricess / 6
+      } so'm`;
+    } else if (mon === 12) {
+      let pricess = corePrice + corePrice * 0.74;
+      txt = `12 oylik to'lov: ${pricess} so'm\nBo'lib to'lash: ${
+        pricess / 12
+      } so'm`;
+    }
+
+    text += txt + "\n\n";
+  }
+
+  return text;
 };
 export default scene;

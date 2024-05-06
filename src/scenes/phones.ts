@@ -204,7 +204,7 @@ async function getPaginatedProducts(
     })
   ).map((item: any) => {
     return {
-      text: item.name,
+      text: `${item.name} ${item.color} `,
       callback_data: `phone_${item.id}`,
     };
   });
