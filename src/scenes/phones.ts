@@ -76,6 +76,66 @@ scene.action(/^prev/, async (ctx: any) => {
   });
 });
 
+scene.action(/^phone_/, async (ctx: any) => {
+  const user_id = String(ctx.from?.id);
+  const productId = ctx.callbackQuery.data;
+  const phoneId = productId.split("_")[1];
+
+  const user = await prisma.user.findFirst({
+    where: {
+      telegram_id: user_id,
+    },
+  });
+
+  if (!user) {
+    return ctx.reply(
+      "Siz ro'yxatdan o'tmagansiz. Iltimos, /start buyrug'ini bosing"
+    );
+  }
+
+  const product = await prisma.product.findFirst({
+    where: {
+      id: phoneId,
+    },
+  });
+
+  if (!product) {
+    return ctx.reply("Bunday telefon mavjud emas");
+  }
+
+  const price = (await prisma.mobilePrice.findFirst({
+    orderBy: {
+      created_at: "desc",
+    },
+  })) || {
+    price: 12700,
+  };
+
+  const totalPrice = price?.price * product.price;
+
+  const text = `Siz tanlagan telefon
+   ${product.name} \n Rangi: ${product.color} Xotirasi: ${product.memory}GB \n Narxi: ${totalPrice} so'm.\nBo'lib to'lash uchun narxlarni ko'rasizmi?`;
+
+  ctx.editMessageText(text, {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "Ha",
+            callback_data: `confirm_${phoneId}`,
+          },
+          {
+            text: "Yo'q",
+            callback_data: `cancel_${phoneId}`,
+          },
+        ],
+      ],
+    },
+  });
+
+  return ctx.scene.enter("installment");
+});
+
 scene.action(
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/,
   async (ctx: any) => {
@@ -145,7 +205,7 @@ async function getPaginatedProducts(
   ).map((item: any) => {
     return {
       text: item.name,
-      callback_data: item.id,
+      callback_data: `phone_${item.id}`,
     };
   });
 

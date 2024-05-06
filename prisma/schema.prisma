@@ -37,7 +37,7 @@ model category {
 
 
 model product {
-  id        String  @id @default(uuid())
+  id        String  @id @default(cuid())
   name      String
   price     Float
   color     String?
