@@ -5,12 +5,17 @@ import { chunkArrayInline, keyboards } from "../utils/keyboards";
 import { callback } from "telegraf/typings/button";
 import { inlineKeyboard } from "telegraf/typings/markup";
 import { Prisma } from "@prisma/client";
+import { formatNumber } from "../lib/helper";
 const scene = new Scenes.BaseScene("phones");
 
 scene.hears("/start", async (ctx: any) => {
   return await ctx.scene.enter("start");
 });
 
+scene.action(["main_menu", /^cancel/], async (ctx: any) => {
+  ctx.deleteMessage();
+  await ctx.scene.enter("start");
+});
 scene.action(/^next_/, async (ctx: any) => {
   const callbackData = ctx.callbackQuery.data;
   const categoryId = callbackData.split("_")[1];
@@ -31,6 +36,11 @@ scene.action(/^next_/, async (ctx: any) => {
   categoryProducts.push({
     text: "Oldingi sahifa",
     callback_data: `prev_${categoryId}_${page - 1}`,
+  });
+
+  categoryProducts.push({
+    text: "Asosiy menyuga qaytish",
+    callback_data: "main_menu",
   });
 
   const inlineKeyboards = chunkArrayInline(categoryProducts, 1);
@@ -65,6 +75,11 @@ scene.action(/^prev/, async (ctx: any) => {
         callback_data: `prev_${categoryId}_${page - 1}`,
       });
   }
+
+  categoryProducts.push({
+    text: "Asosiy menyuga qaytish",
+    callback_data: "main_menu",
+  });
 
   const inlineKeyboards = chunkArrayInline(categoryProducts, 1);
 
@@ -114,7 +129,11 @@ scene.action(/^phone_/, async (ctx: any) => {
   const totalPrice = price?.price * product.price;
 
   const text = `Siz tanlagan telefon
-   ${product.name} \n Rangi: ${product.color} Xotirasi: ${product.memory}GB \n Narxi: ${totalPrice} so'm.\nBo'lib to'lash uchun narxlarni ko'rasizmi?`;
+   ${product.name} \n Rangi: ${product.color} Xotirasi: ${
+    product.memory
+  }GB \n Narxi: ${formatNumber(
+    totalPrice
+  )} so'm.\nBo'lib to'lash uchun narxlarni ko'rasizmi?`;
 
   ctx.editMessageText(text, {
     reply_markup: {
@@ -127,6 +146,12 @@ scene.action(/^phone_/, async (ctx: any) => {
           {
             text: "Yo'q",
             callback_data: `cancel_${phoneId}`,
+          },
+        ],
+        [
+          {
+            text: "Bosh sahifaga qaytish",
+            callback_data: `main_menu`,
           },
         ],
       ],

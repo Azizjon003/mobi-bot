@@ -59,7 +59,7 @@ model order {
   product   product @relation(fields: [product_id], references: [id])
   price     Float
   initial_price Float
-  month     Int
+  month     Int?
   product_id String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
