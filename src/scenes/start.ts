@@ -31,6 +31,8 @@ scene.enter(async (ctx: any) => {
   } else if (isEnabled === "four") {
     await sendCategories(ctx, prisma, chunkArrayInline);
     return await ctx.scene.enter("phones");
+  } else if (isEnabled === "two") {
+    return await ctx.scene.enter("admin");
   }
 });
 

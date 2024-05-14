@@ -44,23 +44,57 @@ model product {
   memory    String?
   category  category @relation(fields: [category_id], references: [id])
   category_id String
-  orders    order[]
+
+  productColorMemory ProductColorMemory[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
 
 
+model color {
+  id        String  @id @default(uuid())
+  name      String
+  productColorMemory ProductColorMemory[]
+  created_at DateTime @default(now())
+
+  updated_at DateTime @updatedAt
+}
+
+model memory {
+  id        String  @id @default(uuid())
+  name      String
+  productColorMemory ProductColorMemory[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+
+model ProductColorMemory {
+  id          String                 @id @default(cuid())
+  product     product                @relation(fields: [productId], references: [id])
+  productId   String
+  color       color?                  @relation(fields: [colorId], references: [id])
+  colorId     String?
+  memory      memory?                 @relation(fields: [memoryId], references: [id])
+  memoryId    String?
+  price       Float
+  order       order[]
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+}
+
 
 model order {
   id        String  @id @default(uuid())
   user      user @relation(fields: [user_id], references: [id])
   user_id   String
-  product   product @relation(fields: [product_id], references: [id])
+  product   ProductColorMemory @relation(fields: [product_color_id], references: [id])
   price     Float
   initial_price Float
   month     Int?
-  product_id String
+  product_color_id String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
