@@ -112,53 +112,96 @@ scene.action(/^phone_/, async (ctx: any) => {
     where: {
       id: phoneId,
     },
+    include: {
+      productColorMemory: {
+        select: {
+          color: true,
+          memory: true,
+        },
+      },
+    },
   });
 
   if (!product) {
     return ctx.reply("Bunday telefon mavjud emas");
   }
+  let color: any = [];
 
-  const price = (await prisma.mobilePrice.findFirst({
-    orderBy: {
-      created_at: "desc",
-    },
-  })) || {
-    price: 12700,
-  };
+  let memory: any = [];
 
-  const totalPrice = price?.price * product.price;
-
-  const text = `Siz tanlagan telefon
-   ${product.name} \n Rangi: ${product.color} Xotirasi: ${
-    product.memory
-  }GB \n Narxi: ${formatNumber(
-    totalPrice
-  )} so'm.\nBo'lib to'lash uchun narxlarni ko'rasizmi?`;
-
-  ctx.editMessageText(text, {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "Ha",
-            callback_data: `confirm_${phoneId}`,
-          },
-          {
-            text: "Yo'q",
-            callback_data: `cancel_${phoneId}`,
-          },
-        ],
-        [
-          {
-            text: "Bosh sahifaga qaytish",
-            callback_data: `main_menu`,
-          },
-        ],
-      ],
-    },
+  product.productColorMemory.forEach((item: any) => {
+    color.push({
+      text: `${item.color}`,
+      callback_data: `color_${item.id}`,
+    });
+    memory.push({
+      text: `${item.memory}GB`,
+      callback_data: `memory_${item.id}`,
+    });
   });
 
-  return ctx.scene.enter("installment");
+  if (color.length === 0 && memory.length === 0) {
+    // const price = (await prisma.mobilePrice.findFirst({
+    //   orderBy: {
+    //     created_at: "desc",
+    //   },
+    // })) || {
+    //   price: 12700,
+    // };
+
+    // const totalPrice = price?.price * product.price;
+
+    // const text = `Siz tanlagan telefon
+    //  ${product.name} \n Rangi: ${product.color} Xotirasi: ${
+    //   product.memory
+    // }GB \n Narxi: ${formatNumber(
+    //   totalPrice
+    // )} so'm.\nBo'lib to'lash uchun narxlarni ko'rasizmi?`;
+
+    // ctx.editMessageText(text, {
+    //   reply_markup: {
+    //     inline_keyboard: [
+    //       [
+    //         {
+    //           text: "Ha",
+    //           callback_data: `confirm_${phoneId}`,
+    //         },
+    //         {
+    //           text: "Yo'q",
+    //           callback_data: `cancel_${phoneId}`,
+    //         },
+    //       ],
+    //       [
+    //         {
+    //           text: "Bosh sahifaga qaytish",
+    //           callback_data: `main_menu`,
+    //         },
+    //       ],
+    //     ],
+    //   },
+    // });
+
+    await sendProductDetails(ctx, prisma, product, phoneId);
+
+    return ctx.scene.enter("installment");
+  }
+
+  if (color.length == 0) {
+    ctx.editMessageText(`Quyidagi xotiralardan birini tanlang`, {
+      reply_markup: {
+        inline_keyboard: chunkArrayInline(memory, 1),
+      },
+    });
+  }
+  if (memory.length == 0) {
+    return ctx.editMessageText(`Quyidagi ranglardan birini tanlang`, {
+      reply_markup: {
+        inline_keyboard: chunkArrayInline(color, 1),
+      },
+    });
+  }
+
+  return ctx.scene.enter("colorandmemory");
 });
 
 scene.action(
@@ -244,5 +287,54 @@ async function getPaginatedProducts(
     products,
     total: totalCount,
   };
+}
+
+export async function sendProductDetails(
+  ctx: any,
+  prisma: any,
+  product: any,
+  phoneId: string
+) {
+  const price = (await prisma.mobilePrice.findFirst({
+    orderBy: {
+      created_at: "desc",
+    },
+  })) || {
+    price: 12700,
+  };
+
+  const totalPrice = price?.price * product.price;
+
+  const text = `Siz tanlagan telefon
+   ${product.name} \n Rangi: ${product.color} Xotirasi: ${
+    product.memory
+  }GB \n Narxi: ${formatNumber(
+    totalPrice
+  )} so'm.\nBo'lib to'lash uchun narxlarni ko'rasizmi?`;
+
+  ctx.editMessageText(text, {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "Ha",
+            callback_data: `confirm_${phoneId}`,
+          },
+          {
+            text: "Yo'q",
+            callback_data: `cancel_${phoneId}`,
+          },
+        ],
+        [
+          {
+            text: "Bosh sahifaga qaytish",
+            callback_data: `main_menu`,
+          },
+        ],
+      ],
+    },
+  });
+
+  // return ctx.scene.enter("installment");
 }
 export default scene;
