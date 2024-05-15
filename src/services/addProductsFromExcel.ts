@@ -55,8 +55,8 @@ const addProductsFromExcel = async () => {
     const product = await prisma.product.create({
       data: {
         name: String(phone.name),
-        memory: String(phone.memory),
-        color: String(phone.color),
+        // memory: String(phone.memory),
+        // color: String(phone.color),
         price: phone.price,
         category_id: category.id,
       },
