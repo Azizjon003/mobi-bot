@@ -96,6 +96,7 @@ scene.action(/^phone_/, async (ctx: any) => {
   const productId = ctx.callbackQuery.data;
   const phoneId = productId.split("_")[1];
 
+  console.log("nimadir");
   const user = await prisma.user.findFirst({
     where: {
       telegram_id: user_id,
@@ -114,7 +115,7 @@ scene.action(/^phone_/, async (ctx: any) => {
     },
     include: {
       productColorMemory: {
-        select: {
+        include: {
           color: true,
           memory: true,
         },
@@ -131,14 +132,16 @@ scene.action(/^phone_/, async (ctx: any) => {
 
   product.productColorMemory.forEach((item: any) => {
     color.push({
-      text: `${item.color}`,
+      text: `${item.color.name}`,
       callback_data: `color_${item.id}`,
     });
     memory.push({
-      text: `${item.memory}GB`,
+      text: `${item.memory.name}GB`,
       callback_data: `memory_${item.id}`,
     });
   });
+
+  console.log(product);
 
   if (color.length === 0 && memory.length === 0) {
     // const price = (await prisma.mobilePrice.findFirst({
@@ -181,10 +184,19 @@ scene.action(/^phone_/, async (ctx: any) => {
     //   },
     // });
 
-    await sendProductDetails(ctx, prisma, product, phoneId);
+    await sendProductDetails(
+      ctx,
+      prisma,
+      product,
+      product.productColorMemory[0].id,
+      "yo'q",
+      "yo'q"
+    );
 
     return ctx.scene.enter("installment");
   }
+
+  console.log(color, memory, "next");
 
   if (color.length == 0) {
     ctx.editMessageText(`Quyidagi xotiralardan birini tanlang`, {
@@ -193,10 +205,19 @@ scene.action(/^phone_/, async (ctx: any) => {
       },
     });
   }
+
   if (memory.length == 0) {
-    return ctx.editMessageText(`Quyidagi ranglardan birini tanlang`, {
+    ctx.editMessageText(`Quyidagi ranglardan birini tanlang`, {
       reply_markup: {
         inline_keyboard: chunkArrayInline(color, 1),
+      },
+    });
+  }
+
+  if (color.length != 0 && memory.length != 0) {
+    await ctx.editMessageText(`Quyidagi xotiralardan birini tanlang`, {
+      reply_markup: {
+        inline_keyboard: chunkArrayInline(color, 2),
       },
     });
   }
@@ -272,7 +293,7 @@ async function getPaginatedProducts(
     })
   ).map((item: any) => {
     return {
-      text: `${item.name} ${item.color} `,
+      text: `${item.name}`,
       callback_data: `phone_${item.id}`,
     };
   });
@@ -293,7 +314,9 @@ export async function sendProductDetails(
   ctx: any,
   prisma: any,
   product: any,
-  phoneId: string
+  phoneId: string,
+  color: string,
+  memory: string
 ) {
   const price = (await prisma.mobilePrice.findFirst({
     orderBy: {
@@ -306,9 +329,9 @@ export async function sendProductDetails(
   const totalPrice = price?.price * product.price;
 
   const text = `Siz tanlagan telefon
-   ${product.name} \n Rangi: ${product.color} Xotirasi: ${
-    product.memory
-  }GB \n Narxi: ${formatNumber(
+   ${
+     product.name
+   } \n Rangi: ${color} Xotirasi: ${memory}GB \n Narxi: ${formatNumber(
     totalPrice
   )} so'm.\nBo'lib to'lash uchun narxlarni ko'rasizmi?`;
 

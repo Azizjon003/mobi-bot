@@ -24,6 +24,8 @@ scene.action(/^confirm/, async (ctx: any) => {
   const productId = callbackData.split("_")[1];
   const user_id = String(ctx.from?.id);
 
+  // await ctx.deleteMessage();
+
   const user = await prisma.user.findFirst({
     where: {
       telegram_id: user_id,
@@ -36,7 +38,7 @@ scene.action(/^confirm/, async (ctx: any) => {
     );
   }
 
-  const product = await prisma.product.findFirst({
+  const product = await prisma.productColorMemory.findFirst({
     where: {
       id: String(productId),
     },
@@ -74,9 +76,14 @@ scene.action(/^per_/, async (ctx: any) => {
     );
   }
 
-  const product = await prisma.product.findFirst({
+  const product = await prisma.productColorMemory.findFirst({
     where: {
       id: String(productId),
+    },
+    include: {
+      color: true,
+      memory: true,
+      product: true,
     },
   });
 
@@ -113,11 +120,11 @@ scene.action(/^per_/, async (ctx: any) => {
 
     "telefon raqami: " + user?.phone,
 
-    "Telefon: " + product.name,
+    "Telefon: " + product.product.name,
 
-    "Xotira: " + product.memory,
+    "Xotira: " + product?.memory?.name || "",
 
-    "Rang: " + product.color,
+    "Rang: " + product?.color?.name || "",
 
     "Narxi: " + formatNumber(price.price * product.price) + " so'm",
 
@@ -139,7 +146,7 @@ scene.action(/^per_/, async (ctx: any) => {
     {
       caption: `
       Kim tomonidan yuborildi <a href="tg://user?id=${user.telegram_id}">${user.id}</a>\
-      Foydalanuvchi : ${user.name} \n Telefon : ${user.phone} \n Rusumi : ${product.name}\n ${text} `,
+      Foydalanuvchi : ${user.name} \n Telefon : ${user.phone} \n Rusumi : ${product.product.name}\n ${text} `,
       parse_mode: "HTML",
     }
   );
@@ -149,7 +156,7 @@ scene.action(/^per_/, async (ctx: any) => {
   await prisma.order.create({
     data: {
       user_id: user.id,
-      product_id: product.id,
+      product_color_id: product.id,
       initial_price: totalPrice * percentage,
       price: totalPrice,
     },

@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,104 +8,93 @@ datasource db {
 }
 
 model user {
-  id       String  @id @default(uuid())
-  username  String?
-  name      String?
-  role      RoleEnum @default(USER)
-  phone     String?      
-  telegram_id String @unique
-  isActive  Boolean @default(true)
-  orders    order[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id          String   @id @default(uuid())
+  username    String?
+  name        String?
+  role        RoleEnum @default(USER)
+  phone       String?
+  telegram_id String   @unique
+  isActive    Boolean  @default(true)
+  orders      order[]
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 }
+
 enum RoleEnum {
   ADMIN
   USER
 }
 
-
-
 model category {
-  id        String  @id @default(uuid())
-  name      String
-  products  product[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id         String    @id @default(uuid())
+  name       String
+  products   product[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 }
 
-
 model product {
-  id        String  @id @default(cuid())
-  name      String
-  price     Float
-  color     String?
-  memory    String?
-  category  category @relation(fields: [category_id], references: [id])
+  id          String   @id @default(cuid())
+  name        String   @unique
+  price       Float
+  color       String?
+  memory      String?
+  category    category @relation(fields: [category_id], references: [id])
   category_id String
 
   productColorMemory ProductColorMemory[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @updatedAt
 }
 
-
-
 model color {
-  id        String  @id @default(uuid())
-  name      String
+  id                 String               @id @default(uuid())
+  name               String
+  productId          String
   productColorMemory ProductColorMemory[]
-  created_at DateTime @default(now())
-
-  updated_at DateTime @updatedAt
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @updatedAt
 }
 
 model memory {
-  id        String  @id @default(uuid())
-  name      String
+  id                 String               @id @default(uuid())
+  name               String
+  productId          String
   productColorMemory ProductColorMemory[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @updatedAt
 }
-
-
 
 model ProductColorMemory {
-  id          String                 @id @default(cuid())
-  product     product                @relation(fields: [productId], references: [id])
-  productId   String
-  color       color?                  @relation(fields: [colorId], references: [id])
-  colorId     String?
-  memory      memory?                 @relation(fields: [memoryId], references: [id])
-  memoryId    String?
-  price       Float
-  order       order[]
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
+  id        String   @id @default(cuid())
+  product   product  @relation(fields: [productId], references: [id])
+  productId String
+  color     color?   @relation(fields: [colorId], references: [id])
+  colorId   String?
+  memory    memory?  @relation(fields: [memoryId], references: [id])
+  memoryId  String?
+  price     Float
+  order     order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-
 
 model order {
-  id        String  @id @default(uuid())
-  user      user @relation(fields: [user_id], references: [id])
-  user_id   String
-  product   ProductColorMemory @relation(fields: [product_color_id], references: [id])
-  price     Float
-  initial_price Float
-  month     Int?
+  id               String             @id @default(uuid())
+  user             user               @relation(fields: [user_id], references: [id])
+  user_id          String
+  product          ProductColorMemory @relation(fields: [product_color_id], references: [id])
+  price            Float
+  initial_price    Float
+  month            Int?
   product_color_id String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
 }
-
-
 
 model mobilePrice {
-  id        String  @id @default(uuid())
-  price     Float
+  id         String   @id @default(uuid())
+  price      Float
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
-
-
-

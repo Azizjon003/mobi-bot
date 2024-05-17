@@ -37,7 +37,7 @@ console.log(phones);
 const addProductsFromExcel = async () => {
   const category = await prisma.category.findFirst({
     where: {
-      id: "91b34cf1-a878-4e0d-975d-ef2c7bec3382",
+      id: "1145d9ba-80f0-43ef-8dc9-48d17ce20d36",
     },
   });
 
@@ -52,8 +52,12 @@ const addProductsFromExcel = async () => {
   });
   let count = 0;
   for (const phone of phones) {
-    const product = await prisma.product.create({
-      data: {
+    const product = await prisma.product.upsert({
+      where: {
+        name: String(phone.name),
+      },
+      update: {},
+      create: {
         name: String(phone.name),
         // memory: String(phone.memory),
         // color: String(phone.color),
@@ -61,6 +65,53 @@ const addProductsFromExcel = async () => {
         category_id: category.id,
       },
     });
+    let color;
+
+    if (phone?.color) {
+      color = await prisma.color.findFirst({
+        where: {
+          name: phone.color,
+          productId: product.id,
+        },
+      });
+
+      if (!color) {
+        color = await prisma.color.create({
+          data: {
+            name: phone.color,
+            productId: product.id,
+          },
+        });
+      }
+    }
+    let memory;
+    if (phone?.memory) {
+      memory = await prisma.memory.findFirst({
+        where: {
+          name: phone.memory,
+          productId: product.id,
+        },
+      });
+
+      if (!memory) {
+        memory = await prisma.memory.create({
+          data: {
+            name: phone.memory,
+            productId: product.id,
+          },
+        });
+      }
+    }
+
+    const productMemory = await prisma.productColorMemory.create({
+      data: {
+        productId: product.id,
+        colorId: color?.id,
+        memoryId: memory?.id,
+        price: phone.price,
+      },
+    });
+
     count++;
   }
 

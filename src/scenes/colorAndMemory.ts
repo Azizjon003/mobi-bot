@@ -8,13 +8,15 @@ import { sendProductDetails } from "./phones";
 const scene = new Scenes.BaseScene("colorandmemory");
 
 scene.action(/^color_/, async (ctx: any) => {
+  const telegramId = String(ctx?.from?.id);
   const user = await prisma.user.findFirst({
     where: {
-      id: ctx.from.id,
+      telegram_id: telegramId,
     },
   });
 
   if (!user) {
+    console.log("user ");
     return await ctx.scene.enter("start");
   }
 
@@ -24,6 +26,10 @@ scene.action(/^color_/, async (ctx: any) => {
   const colorAndMemory = await prisma.productColorMemory.findFirst({
     where: {
       id: String(colorId),
+    },
+    include: {
+      memory: true,
+      color: true,
     },
   });
 
@@ -38,7 +44,7 @@ scene.action(/^color_/, async (ctx: any) => {
     },
     include: {
       productColorMemory: {
-        select: {
+        include: {
           color: true,
           memory: true,
         },
@@ -58,13 +64,20 @@ scene.action(/^color_/, async (ctx: any) => {
 
   product.productColorMemory.forEach((item: any) => {
     memory.push({
-      text: `${item.memory}GB`,
+      text: `${item.memory.name}GB`,
       callback_data: `memory_${item.id}`,
     });
   });
 
   if (memory.length === 0) {
-    await sendProductDetails(ctx, prisma, product, product.id);
+    await sendProductDetails(
+      ctx,
+      prisma,
+      product,
+      colorId,
+      colorAndMemory?.color?.name || "yo'q",
+      "Yo'q"
+    );
     return ctx.scene.enter("installment");
   }
 
@@ -81,7 +94,7 @@ scene.action(/^color_/, async (ctx: any) => {
 scene.action(/^memory_/, async (ctx: any) => {
   const user = await prisma.user.findFirst({
     where: {
-      id: ctx.from.id,
+      telegram_id: String(ctx.from.id),
     },
   });
 
@@ -96,6 +109,10 @@ scene.action(/^memory_/, async (ctx: any) => {
     where: {
       id: String(memoryId),
     },
+    include: {
+      color: true,
+      memory: true,
+    },
   });
 
   if (!colorAndMemory) {
@@ -109,7 +126,7 @@ scene.action(/^memory_/, async (ctx: any) => {
     },
     include: {
       productColorMemory: {
-        select: {
+        include: {
           color: true,
           memory: true,
         },
@@ -125,7 +142,14 @@ scene.action(/^memory_/, async (ctx: any) => {
     return await ctx.scene.enter("start");
   }
 
-  await sendProductDetails(ctx, prisma, product, product.id);
+  await sendProductDetails(
+    ctx,
+    prisma,
+    product,
+    memoryId,
+    colorAndMemory?.color?.name || "Yo'q",
+    colorAndMemory?.memory?.name || "yo'q"
+  );
   return ctx.scene.enter("installment");
 });
 scene.hears("/start", async (ctx: any) => {
