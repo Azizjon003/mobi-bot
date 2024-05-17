@@ -3,7 +3,11 @@ import enabled from "../utils/enabled";
 import { sendCategories } from "./control";
 import prisma from "../../prisma/prisma";
 import { chunkArrayInline } from "../utils/keyboards";
-
+const keyboard = [
+  ["Userlarni ko'rish", "Faol foydalanuvchilar"],
+  ["Mahsulotlar soni"],
+  ["Foydalanuvchilarga xabar yuborish"],
+];
 export const keyboards = [];
 const scene = new Scenes.BaseScene("start");
 scene.enter(async (ctx: any) => {
@@ -32,6 +36,13 @@ scene.enter(async (ctx: any) => {
     await sendCategories(ctx, prisma, chunkArrayInline);
     return await ctx.scene.enter("phones");
   } else if (isEnabled === "two") {
+    ctx.reply("Assalomu alaykum admin xush kelibsiz", {
+      reply_markup: {
+        keyboard: keyboard,
+        resize_keyboard: true,
+      },
+    });
+
     return await ctx.scene.enter("admin");
   }
 });

@@ -186,17 +186,17 @@ const priceCalcFunk = (price: number, percentage: number) => {
     let corePrice = price - (price * percentage) / 100;
     if (mon === 3) {
       let pricess = corePrice + corePrice * 0.20104;
-      txt = `3 oylik to'lov: ${formatNumber(
+      txt = `3 oylik to'lov uchun umumiy summa: ${formatNumber(
         pricess
       )} so'm\nBo'lib to'lash: ${formatNumber(pricess / 3)} so'm`;
     } else if (mon === 6) {
       let pricess = corePrice + corePrice * 0.36757;
-      txt = `6 oylik to'lov: ${formatNumber(
+      txt = `6 oylik to'lov uchun umumiy summa: ${formatNumber(
         pricess
       )} so'm\nBo'lib to'lash: ${formatNumber(pricess / 6)} so'm`;
     } else if (mon === 12) {
       let pricess = corePrice + corePrice * 0.74;
-      txt = `12 oylik to'lov: ${formatNumber(
+      txt = `12 oylik to'lov uchun umumiy summa: ${formatNumber(
         pricess
       )} so'm\nBo'lib to'lash: ${formatNumber(pricess / 12)} so'm`;
     }

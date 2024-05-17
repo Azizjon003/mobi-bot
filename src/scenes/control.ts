@@ -52,6 +52,8 @@ scene.on("contact", async (ctx: any) => {
   // });
 
   await sendCategories(ctx, prisma, chunkArrayInline);
+
+  await ctx.scene.enter("phones");
 });
 
 export async function sendCategories(

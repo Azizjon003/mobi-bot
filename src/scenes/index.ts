@@ -6,6 +6,8 @@ import phones from "./phones";
 import admin from "./admin";
 import installment from "./installment";
 import colorandmemory from "./colorAndMemory";
+import sendMessage from "./sendMessage";
+import prisma from "../../prisma/prisma";
 const stage = new Scenes.Stage([
   start,
   control,
@@ -13,6 +15,7 @@ const stage = new Scenes.Stage([
   installment,
   admin,
   colorandmemory,
+  sendMessage,
 ]);
 
 export default stage;
