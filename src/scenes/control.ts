@@ -9,8 +9,16 @@ const scene = new Scenes.BaseScene("control");
 scene.hears("/start", async (ctx: any) => {
   return await ctx.scene.enter("start");
 });
-scene.on("contact", async (ctx: any) => {
-  const phone = ctx.message.contact.phone_number;
+scene.on("message", async (ctx: any) => {
+  const phone = ctx.message.text;
+
+  const uzbekPhoneRegex = /(?:\+?998|8) ?\d{2} ?\d{3} ?\d{2} ?\d{2}/;
+
+  if (!uzbekPhoneRegex.test(phone)) {
+    return ctx.reply(
+      "Telefon raqamingizni noto'g'ri yubordingiz. Iltimos, qaytadan urinib ko'ring"
+    );
+  }
   const user_id = String(ctx.from?.id);
 
   const user = await prisma.user.findFirst({

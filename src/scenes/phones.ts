@@ -131,17 +131,20 @@ scene.action(/^phone_/, async (ctx: any) => {
   let memory: any = [];
 
   product.productColorMemory.forEach((item: any) => {
-    color.push({
-      text: `${item.color.name}`,
-      callback_data: `color_${item.id}`,
-    });
-    memory.push({
-      text: `${item.memory.name}GB`,
-      callback_data: `memory_${item.id}`,
-    });
+    if (item?.color)
+      color.push({
+        text: `${item?.color?.name}`,
+        callback_data: `color_${item.id}`,
+      });
+
+    if (item?.memory)
+      memory.push({
+        text: `${item?.memory?.name}GB`,
+        callback_data: `memory_${item.id}`,
+      });
   });
 
-  console.log(product);
+  console.log(product.productColorMemory, memory);
 
   if (color.length === 0 && memory.length === 0) {
     // const price = (await prisma.mobilePrice.findFirst({

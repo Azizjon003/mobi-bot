@@ -19,14 +19,14 @@ scene.enter(async (ctx: any) => {
     ctx.telegram.sendMessage(
       user_id,
       `Assalomu alaykum, ${ctx.from.first_name}!
-    Telefon raqamingizni yuboring:
+    Telefon raqamingizni yuboring.Telefon raqamingizni kiriting Misol uchun: +998901234567
     `,
       {
         reply_markup: {
-          keyboard: [
-            [{ text: "Telefon raqamni yuborish", request_contact: true }],
-          ],
-          resize_keyboard: true,
+          // keyboard: [
+          //   [{ text: "Telefon raqamni yuborish", request_contact: true }],
+          // ],
+          // resize_keyboard: true,
         },
       }
     );
